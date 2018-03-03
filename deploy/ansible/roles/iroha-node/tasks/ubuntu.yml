@@ -1,18 +1,20 @@
+
 ---
-  - set_fact: confPath="/opt/docker/iroha/conf"
+  - set_fact: key={{ key | int + 1 }}
 
-  - name: install python 2
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+  - name: Install easy install
+    apt: 
+      name: python-setuptools
+      state: installed
 
-  - name: Install easy_install
-    apt: state=installed name=python-setuptools
-
-  - easy_install:
+  - name: Install docker-py
+    easy_install:
       name: docker-py
+      state: latest
 
-  - name: Setup iroha docker network
+  - name: Setup docker network
     docker_network:
-      name: iroha_network
+      name: "{{ iroha_net }}"
 
   - name: Run postgres in docker
     docker_container:
@@ -25,11 +27,11 @@
         POSTGRES_USER: '{{ postgresUser }}'
         POSTGRES_PASSWORD: '{{ postgresPassword }}'
       networks:
-        - name: iroha_network
+        - name: "{{ iroha_net }}"
 
   - name: Make conf dir
     file:
-      path: '/opt/docker/iroha/conf'
+      path: "{{ confPath }}"
       state: directory
       mode: 0755
       owner: root
@@ -40,35 +42,34 @@
       dest: "{{ confPath }}/config.sample"
       mode: 0600
 
-  - name: Copy peers list
-    template:
-      src: peers.list.j2
-      dest: "{{ confPath }}/peers.list"
+  - name: Copy keys and genesis block
+    copy:
+      src: "{{ item }}"
+      dest: "{{ confPath }}"
       mode: 0644
-
-  - name: Get list of files to publish into container
-    find:
-      paths: "{{ confPath }}"
-    register: findResult
+    with_items:
+      - "{{ filesDir }}/node{{ key }}.pub"
+      - "{{ filesDir }}/node{{ key }}.priv"
+      - "{{ filesDir }}/genesis.block"
 
   - name: Run iroha in docker
     docker_container:
       name: iroha
-      image: hyperledger/iroha-docker:develop
+      image: hyperledger/iroha-docker:develop_latest
       state: started
       restart: yes
       recreate: yes
       pull: yes
       ports:
         - "50051:50051"
-        - "10001:10001"
+        - "{{ hostvars[ansible_host].internal_port }}:{{ hostvars[ansible_host].internal_port }}"
       networks:
-        - name: iroha_network
+        - name: "{{ iroha_net }}"
       volumes:
         - "{{ confPath }}:/opt/iroha_data"
       env:
         POSTGRES_HOST: "{{ postgresName }}"
-        POSTGRES_PORT: 5432        
+        POSTGRES_PORT: 5432
         POSTGRES_USER: "{{ postgresUser }}"
         POSTGRES_PASSWORD: "{{ postgresPassword }}"
-        KEY: node{{ key }}
+        KEY: "node{{ key }}"

@@ -1,4 +1,7 @@
-[iroha-cluster]
-node-1 ansible_host=209.250.248.121 ssh_user=root
-node-2 ansible_host=209.250.248.225 ssh_user=root
-node-3 ansible_host=209.250.248.185 ssh_user=root
+[iroha-nodes]
+iroha-ansible-test1 ansible_host=207.148.74.67 ansible_user=root
+iroha-ansible-test2 ansible_host=45.77.175.222 ansible_user=root
+iroha-ansible-test3 ansible_host=45.32.105.9 ansible_user=root
+
+[locals]
+localhost           ansible_connection=local

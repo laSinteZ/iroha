@@ -1,8 +1,9 @@
 ---
+  # docker container postgres settings
   postgresName: iroha_postgres
   postgresUser: psql
   postgresPassword: psql
-  peers:
-    - 209.250.248.121:10001
-    - 209.250.248.225:10001
-    - 209.250.248.185:10001
+
+  confPath: /opt/docker/iroha/conf   # left for Ubuntu playbook (might be different for other distros)
+  iroha_net: iroha_network  # name of docker network
+  key: 0    # node ID counter init value

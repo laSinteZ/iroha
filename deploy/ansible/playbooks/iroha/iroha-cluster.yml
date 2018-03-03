@@ -1,6 +1,19 @@
 ---
-  - hosts: iroha-cluster
+  - hosts: iroha-nodes
+    gather_facts: False
+
+    tasks:
+    - name: install python 2
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+
+  - hosts: locals
+    gather_facts: true
+    roles:
+      - { role: iroha-gen }
+
+  - hosts: iroha-nodes
     gather_facts: true
     roles:
       - { role: docker, tags: docker }
-      - { role: iroha-node, tags: iroha-node }
+      - { role: iroha-node }
