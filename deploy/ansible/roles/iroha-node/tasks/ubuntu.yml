@@ -1,9 +1,6 @@
-
 ---
-  - set_fact: key={{ key | int + 1 }}
-
   - name: Install easy install
-    apt: 
+    apt:
       name: python-setuptools
       state: installed
 
@@ -62,7 +59,7 @@
       pull: yes
       ports:
         - "50051:50051"
-        - "{{ hostvars[ansible_host].internal_port }}:{{ hostvars[ansible_host].internal_port }}"
+        - "{{ internal_port }}:{{ internal_port }}"
       networks:
         - name: "{{ iroha_net }}"
       volumes:
