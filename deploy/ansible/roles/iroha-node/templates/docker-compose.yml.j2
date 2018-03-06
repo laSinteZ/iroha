@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+{% for i in range(nodes_in_region | int) %}
+  node_{{ key + i }}:
+    image: hyperledger/iroha-docker:develop_latest
+    ports:
+      - "{{ 50051 + i }}:{{ 50051 + i }}"
+      - "{{ 10001 + i }}:{{ 10001 + i }}"
+    environment:
+      - KEY=node{{ key + i }}
+    depends_on:
+      - postgres_{{ key + i }}
+    tty: true
+    volumes:
+      - /opt/docker/iroha/conf{{ i }}:/opt/iroha_data
+    networks:
+      - iroha_network_{{ i }}
+
+  postgres_{{ key + i }}:
+    image: postgres:9.5
+    environment:
+      - POSTGRES_USER=psql
+      - POSTGRES_PASSWORD=psql
+    networks:
+      - iroha_network_{{ i }}
+
+{% endfor %}
+
+networks:
+{% for i in range(nodes_in_region | int) %}
+  iroha_network_{{ i }}:
+{% endfor %}

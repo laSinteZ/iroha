@@ -32,4 +32,30 @@
       name: docker-ce={{ dockerVersion }}
       state: present
       update_cache: yes
+
+  # added by tyvision
+  - name: Install easy install
+    apt:
+      name: "{{ item }}"
+      update_cache: yes
+      state: installed
+    with_items:
+      - python-setuptools
+      - python-pip
+
+# fix docker-compose up issues
+  - name: remove python modules
+    pip:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+      - docker-py
+      - docker
+
+  - name: reinstall docker-py
+    pip:
+      name: docker
+      state: latest
+
+
   

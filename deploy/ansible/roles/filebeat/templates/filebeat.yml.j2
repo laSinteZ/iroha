@@ -1,0 +1,17 @@
+#============================= Filebeat modules ===============================
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+#================================ General =====================================
+
+name: {{ shipper_name }}
+fields:
+  env: {{ env }}
+
+#================================ Outputs =====================================
+#----------------------------- Logstash output --------------------------------
+output.logstash:
+  hosts: ["{{ logstash_url }}"]
+  ssl.certificate_authorities: ["/etc/ssl/certs/ca-certificates.crt"]

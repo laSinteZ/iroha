@@ -1,0 +1,18 @@
+#  - hosts: locals
+#    roles:
+#      - { role: iroha-gen }
+
+  - hosts:
+    - iroha-east
+    - iroha-west
+    - iroha-south
+    - iroha-north
+    gather_facts: False
+    pre_tasks:
+    - name: install python 2
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python)
+      changed_when: False
+    roles:
+      - { role: docker, tags: docker }
+      - { role: filebeat }
+      - { role: iroha-node }

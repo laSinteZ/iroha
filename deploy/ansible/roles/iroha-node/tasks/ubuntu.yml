@@ -1,72 +1,46 @@
 ---
-  - name: Install easy install
-    apt:
-      name: python-setuptools
-      state: installed
-
-  - name: Install docker-py
-    easy_install:
-      name: docker-py
-      state: latest
-
-  - name: Setup docker network
-    docker_network:
-      name: "{{ iroha_net }}"
-
-  - name: Run postgres in docker
-    docker_container:
-      name: "{{ postgresName }}"
-      image: postgres:9.5
-      state: started
-      recreate: yes
-      restart: yes
-      env:
-        POSTGRES_USER: '{{ postgresUser }}'
-        POSTGRES_PASSWORD: '{{ postgresPassword }}'
-      networks:
-        - name: "{{ iroha_net }}"
+  - setup:
 
   - name: Make conf dir
     file:
-      path: "{{ confPath }}"
+      path: "{{ confPath }}{{ item }}"
       state: directory
       mode: 0755
       owner: root
+    with_sequence: start=0 end=15
 
-  - name: Copy config
+  - name: generate compose
+    template:
+      src: docker-compose.yml.j2
+      dest: "/tmp/docker-compose.yml"
+
+
+  - name: generate configs
     template:
       src: config.j2
-      dest: "{{ confPath }}/config.sample"
-      mode: 0600
+      dest: "{{ confPath }}{{ item }}/config.sample"
+    with_sequence: start=0 end=15
 
-  - name: Copy keys and genesis block
+
+  - name: copy genesis block
     copy:
-      src: "{{ item }}"
-      dest: "{{ confPath }}"
-      mode: 0644
-    with_items:
-      - "{{ filesDir }}/node{{ key }}.pub"
-      - "{{ filesDir }}/node{{ key }}.priv"
-      - "{{ filesDir }}/genesis.block"
+      src: "{{ filesDir }}/genesis.block"
+      dest: "{{ confPath }}{{ item }}/genesis.block"
+    with_sequence: start=0 end=15
 
-  - name: Run iroha in docker
-    docker_container:
-      name: iroha
-      image: hyperledger/iroha-docker:develop_latest
-      state: started
-      restart: yes
-      recreate: yes
-      pull: yes
-      ports:
-        - "50051:50051"
-        - "{{ internal_port }}:{{ internal_port }}"
-      networks:
-        - name: "{{ iroha_net }}"
-      volumes:
-        - "{{ confPath }}:/opt/iroha_data"
-      env:
-        POSTGRES_HOST: "{{ postgresName }}"
-        POSTGRES_PORT: 5432
-        POSTGRES_USER: "{{ postgresUser }}"
-        POSTGRES_PASSWORD: "{{ postgresPassword }}"
-        KEY: "node{{ key }}"
+  - name: copy public keys
+    copy:
+      src: "{{ filesDir }}/node{{ key + item | int}}.pub"
+      dest: "{{ confPath }}{{ item }}/"
+    with_sequence: start=0 end=15
+
+  - name: copy private keys
+    copy:
+      src: "{{ filesDir }}/node{{ key + item | int}}.priv"
+      dest: "{{ confPath }}{{ item }}/"
+    with_sequence: start=0 end=15
+
+  - name: run docker compose
+    command: docker-compose up -d
+    args:
+      chdir: "{{ composeDir }}"

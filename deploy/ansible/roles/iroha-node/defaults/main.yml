@@ -1,6 +1,6 @@
 ---
   # docker container postgres settings
-  postgresName: iroha_postgres
+  postgresName: tmp_postgres
   postgresUser: psql
   postgresPassword: psql
 

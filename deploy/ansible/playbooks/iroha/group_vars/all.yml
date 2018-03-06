@@ -1,1 +1,3 @@
-filesDir: /tmp/iroha-files
+filesDir: /tmp/iroha-bench/iroha-bench
+composeDir: /tmp
+nodes_in_region: 16
