@@ -1,2 +1,2 @@
 internal_port: 10001  # default port for all nodes in iroha-cluster
-nodes_in_region: 7
+nodes_in_region: 2
