@@ -1,6 +1,6 @@
-#  - hosts: locals
-#    roles:
-#      - { role: iroha-gen }
+  - hosts: locals
+    roles:
+      - { role: iroha-gen }
 
   - hosts:
     - iroha-east
