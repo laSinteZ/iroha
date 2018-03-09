@@ -3,7 +3,7 @@ version: '3'
 services:
 {% for i in range(nodes_in_region | int) %}
   node_{{ key + i }}:
-    image: hyperledger/iroha-docker:develop_latest
+    image: lebdron/iroha
     ports:
       - "{{ 50051 + i }}:{{ 50051 + i }}"
       - "{{ 10001 + i }}:{{ 10001 + i }}"
