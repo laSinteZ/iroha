@@ -5,6 +5,6 @@
   "pg_opt" : "host={{ postgresName }}_{{ key + item | int }}_1 port=5432 user={{ postgresUser }} password='{{ postgresPassword }}'",
   "max_proposal_size" : 10,
   "proposal_delay" : 5000,
-  "vote_delay" : 5000,
+  "vote_delay" : 20,
   "load_delay" : 5000
 }
