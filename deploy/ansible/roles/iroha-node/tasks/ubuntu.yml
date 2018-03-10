@@ -7,7 +7,7 @@
       state: directory
       mode: 0755
       owner: root
-    with_sequence: start=0 end=15
+    with_sequence: start=0 end=6
 
   - name: generate compose
     template:
@@ -19,26 +19,26 @@
     template:
       src: config.j2
       dest: "{{ confPath }}{{ item }}/config.sample"
-    with_sequence: start=0 end=15
+    with_sequence: start=0 end=6
 
 
   - name: copy genesis block
     copy:
       src: "{{ filesDir }}/genesis.block"
       dest: "{{ confPath }}{{ item }}/genesis.block"
-    with_sequence: start=0 end=15
+    with_sequence: start=0 end=6
 
   - name: copy public keys
     copy:
       src: "{{ filesDir }}/node{{ key + item | int}}.pub"
       dest: "{{ confPath }}{{ item }}/"
-    with_sequence: start=0 end=15
+    with_sequence: start=0 end=6
 
   - name: copy private keys
     copy:
       src: "{{ filesDir }}/node{{ key + item | int}}.priv"
       dest: "{{ confPath }}{{ item }}/"
-    with_sequence: start=0 end=15
+    with_sequence: start=0 end=6
 
   - name: run docker compose
     command: docker-compose up -d
