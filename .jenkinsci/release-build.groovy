@@ -1,7 +1,10 @@
 #!/usr/bin/env groovy
 
 def doReleaseBuild() {
-  def parallelism = params.PARALLELISM 
+  def parallelism = params.PARALLELISM
+  if (parallelism == null) {
+    parallelism = params.PARALLELISM
+  }
   if ("arm7" in env.NODE_NAME) {
     parallelism = 1
   }
