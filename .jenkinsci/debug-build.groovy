@@ -2,6 +2,13 @@
 
 def doDebugBuild(coverageEnabled=false) {
   def parallelism = params.PARALLELISM
+  // params are always null unless job is started
+  // this is the case for the FIRST build only.
+  // So just set this to same value as default. 
+  // This is a known bug. See https://issues.jenkins-ci.org/browse/JENKINS-41929
+  if (parallelism == null) {
+    parallelism = 4
+  }
   if ("arm7" in env.NODE_NAME) {
     parallelism = 1
   }
@@ -19,13 +26,13 @@ def doDebugBuild(coverageEnabled=false) {
   // speeds up consequent image builds as we simply tag them
   sh "docker pull ${DOCKER_BASE_IMAGE_DEVELOP}"
   if (env.BRANCH_NAME == 'develop') {
-    iC = docker.build("hyperledger/iroha:${GIT_COMMIT}-${BUILD_NUMBER}", "--build-arg PARALLELISM=${env.parallelism} -f /tmp/${env.GIT_COMMIT}/Dockerfile /tmp/${env.GIT_COMMIT}")
+    iC = docker.build("hyperledger/iroha:${GIT_COMMIT}-${BUILD_NUMBER}", "--build-arg PARALLELISM=${parallelism} -f /tmp/${env.GIT_COMMIT}/Dockerfile /tmp/${env.GIT_COMMIT}")
     docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
       iC.push("${platform}-develop")
     }
   }
   else {
-    iC = docker.build("hyperledger/iroha-workflow:${GIT_COMMIT}-${BUILD_NUMBER}", "-f /tmp/${env.GIT_COMMIT}/Dockerfile /tmp/${env.GIT_COMMIT} --build-arg PARALLELISM=${env.parallelism}")
+    iC = docker.build("hyperledger/iroha-workflow:${GIT_COMMIT}-${BUILD_NUMBER}", "-f /tmp/${env.GIT_COMMIT}/Dockerfile /tmp/${env.GIT_COMMIT} --build-arg PARALLELISM=${parallelism}")
   }
   iC.inside(""
     + " -e IROHA_POSTGRES_HOST=${env.IROHA_POSTGRES_HOST}"
@@ -59,7 +66,7 @@ def doDebugBuild(coverageEnabled=false) {
         -DIROHA_VERSION=${env.IROHA_VERSION} \
         ${cmakeOptions}
     """
-    sh "cmake --build build -- -j${env.parallelism}"
+    sh "cmake --build build -- -j${parallelism}"
     sh "ccache --show-stats"
     if ( coverageEnabled ) {
       sh "cmake --build build --target coverage.init.info"
